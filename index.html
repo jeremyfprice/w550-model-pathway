@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pathway Prototype: The Planner Path</title>
+  <style>
+    :root {
+      --bg: #f2ecd7;
+      --card: #fffaf0;
+      --text: #4a4a4a;
+      --muted: #6b6258;
+      --accent: #bc7a5a;
+      --accent-2: #3f5e78;
+      --border: #d8c7af;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f7f2e4 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .frame {
+      width: min(920px, 100%);
+      background: rgba(255,255,255,.45);
+      border: 1px solid rgba(74,74,74,.12);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+    }
+    header {
+      padding: 28px 28px 18px;
+      border-bottom: 1px solid rgba(74,74,74,.12);
+      background: linear-gradient(135deg, rgba(188,122,90,.14), rgba(63,94,120,.08));
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.7rem, 2.8vw, 2.5rem);
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 70ch;
+      margin: 0;
+    }
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      align-items: center;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.7);
+      border: 1px solid rgba(74,74,74,.12);
+      font-size: .92rem;
+    }
+    .pill strong { color: var(--accent-2); }
+    main { padding: 28px; }
+    .card {
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(74,74,74,.12);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 8px 22px rgba(0,0,0,.05);
+    }
+    .scene-label {
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .76rem;
+      color: var(--accent-2);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .story {
+      font-size: 1.08rem;
+      line-height: 1.7;
+      margin: 0;
+      color: var(--text);
+    }
+    .choices {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+    button.choice {
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(74,74,74,.15);
+      background: linear-gradient(180deg, #ffffff, #faf7f0);
+      color: var(--text);
+      padding: 14px 16px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+    button.choice:hover {
+      transform: translateY(-1px);
+      border-color: rgba(188,122,90,.55);
+      box-shadow: 0 8px 18px rgba(188,122,90,.12);
+    }
+    button.choice:focus-visible, .secondary:focus-visible {
+      outline: 3px solid rgba(63,94,120,.35);
+      outline-offset: 2px;
+    }
+    .secondary {
+      border: none;
+      background: transparent;
+      color: var(--accent-2);
+      padding: 0;
+      cursor: pointer;
+      font-size: .96rem;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .status {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(74,74,74,.12);
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: .95rem;
+    }
+    .status span { display: inline-flex; gap: 6px; align-items: center; }
+    .badge {
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(63,94,120,.1);
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+    .endbox {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(188,122,90,.1);
+      border: 1px solid rgba(188,122,90,.22);
+      line-height: 1.6;
+    }
+    .footer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: .94rem;
+      line-height: 1.55;
+      margin-top: 14px;
+    }
+    @media (max-width: 640px) {
+      main, header { padding: 20px; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame" role="application" aria-label="Interactive learning pathway prototype">
+    <header>
+      <h1>The Planner Path</h1>
+      <p class="subtitle">
+        A model interactive pathway for EDUC-W 550. This prototype shows how a learner might move through a topic by making choices, encountering consequences, and revising decisions along the way.
+      </p>
+      <div class="topbar">
+        <div class="pill"><strong>Audience:</strong> Middle school learners</div>
+        <div class="pill"><strong>Topic:</strong> Time management and organization</div>
+        <div class="pill"><strong>Form:</strong> Choose-your-own-adventure style</div>
+      </div>
+    </header>
+
+    <main>
+      <div class="card">
+        <div class="scene-label" id="sceneLabel">Scene 1</div>
+        <p class="story" id="story"></p>
+        <div class="choices" id="choices"></div>
+        <div class="status" id="status" aria-live="polite"></div>
+        <div class="footer-actions">
+          <button class="secondary" id="restartBtn" type="button">Restart story</button>
+          <button class="secondary" id="backBtn" type="button">Go back one step</button>
+        </div>
+        <p class="hint">
+          This model is intentionally short enough to show the structure clearly. A student project would expand this logic with more passages, more depth, and topic-specific content.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      step: 'intro',
+      plannerChecked: false,
+      helpAsked: false,
+      scheduleMade: false,
+      taskStack: 0,
+      history: []
+    };
+
+    const scenes = {
+      intro: {
+        label: 'Scene 1: A busy Monday',
+        text: 'You are a new student who has just opened the school portal. Three assignments are due this week in different classes. You can see the assignments, but you do not yet know which one to start with. What do you do first?',
+        choices: [
+          { text: 'Check every assignment before starting anything.', next: 'review' },
+          { text: 'Start with the easiest assignment you can find.', next: 'easy_start' },
+          { text: 'Ignore the planner and wait until later.', next: 'wait' }
+        ]
+      },
+      review: {
+        label: 'Scene 2: Looking at the whole picture',
+        text: 'You compare the due dates and notice that two assignments are due on the same day. The planner helps you see the bigger picture, and now you can make a more informed decision. What will you do next?',
+        choices: [
+          { text: 'Make a schedule for the week.', next: 'schedule' },
+          { text: 'Ask a classmate how they are organizing their work.', next: 'help' },
+          { text: 'Choose one assignment at random and hope for the best.', next: 'random' }
+        ],
+        effects: () => { state.plannerChecked = true; }
+      },
+      easy_start: {
+        label: 'Scene 2: Starting small',
+        text: 'You begin with the easiest assignment. It feels good to get something finished quickly, but you still have not planned for the other deadlines. Two more assignments are waiting, and time is moving on. What happens next?',
+        choices: [
+          { text: 'Stop and make a schedule now.', next: 'schedule' },
+          { text: 'Keep working without checking the deadlines again.', next: 'random' },
+          { text: 'Ask for help organizing the rest.', next: 'help' }
+        ],
+        effects: () => { state.taskStack += 1; }
+      },
+      wait: {
+        label: 'Scene 2: Waiting too long',
+        text: 'You decide to wait. Later, the portal reminds you that one assignment is due tomorrow. You still have time, but now the choices are more limited. What will you do?',
+        choices: [
+          { text: 'Check the planner immediately and make a plan.', next: 'schedule' },
+          { text: 'Ask for help before you fall further behind.', next: 'help' },
+          { text: 'Keep waiting and hope you can finish everything later.', next: 'late_finish' }
+        ],
+        effects: () => { state.taskStack += 2; }
+      },
+      schedule: {
+        label: 'Scene 3: Building a plan',
+        text: 'You make a schedule. You break larger tasks into smaller pieces, choose a starting point, and block time for each assignment. The system remembers that you made a plan, so later decisions may change. What do you want to do next?',
+        choices: [
+          { text: 'Work on the hardest task first.', next: 'hard_first' },
+          { text: 'Start with the task due soonest.', next: 'soonest' },
+          { text: 'Check in with someone to confirm your plan.', next: 'help' }
+        ],
+        effects: () => { state.scheduleMade = true; state.plannerChecked = true; }
+      },
+      help: {
+        label: 'Scene 3: Asking for support',
+        text: 'You ask for help. Someone shows you how they organize their work and suggests a method for tracking deadlines. You realize that systems are often easier to use when you understand their rules. What next?',
+        choices: [
+          { text: 'Use the advice to make your own schedule.', next: 'schedule' },
+          { text: 'Try a different strategy and compare results.', next: 'compare' },
+          { text: 'Go back and check what assignments are still open.', next: 'review' }
+        ],
+        effects: () => { state.helpAsked = true; }
+      },
+      random: {
+        label: 'Scene 3: Working without a plan',
+        text: 'You keep going without organizing anything. The work gets done in pieces, but you lose track of what still needs attention. A missing deadline now feels possible. Do you want to keep going, or stop and fix the process?',
+        choices: [
+          { text: 'Stop and make a schedule now.', next: 'schedule' },
+          { text: 'Ask for help organizing what is left.', next: 'help' },
+          { text: 'Keep working randomly and see what happens.', next: 'ending_rush' }
+        ],
+        effects: () => { state.taskStack += 1; }
+      },
+      compare: {
+        label: 'Scene 4: Comparing strategies',
+        text: 'You try a new strategy and compare it with your earlier approach. You notice that the planner works best when you check it before making decisions, not after you are already overwhelmed. What does this suggest about the system?',
+        choices: [
+          { text: 'The system works better when I use it early.', next: 'ending_good' },
+          { text: 'The system only matters if I already know how to use it.', next: 'ending_mixed' },
+          { text: 'The system does not really affect my choices.', next: 'ending_mixed' }
+        ]
+      },
+      hard_first: {
+        label: 'Scene 4: Hard first',
+        text: 'You start with the hardest task. It is challenging, but you finish more than you expected because you used your best energy early. The schedule helps you keep moving. What is the result?',
+        choices: [
+          { text: 'Finish the rest in order of due date.', next: 'ending_good' },
+          { text: 'Take a break and review the plan again.', next: 'review' },
+          { text: 'Change the schedule if something new comes up.', next: 'ending_good' }
+        ]
+      },
+      soonest: {
+        label: 'Scene 4: Soonest first',
+        text: 'You choose the task due soonest. This reduces stress, but you still need to manage the other work. The system has helped you prioritize. What happens next?',
+        choices: [
+          { text: 'Keep following the schedule carefully.', next: 'ending_good' },
+          { text: 'Ask for help if the workload changes.', next: 'help' },
+          { text: 'Rebalance the plan based on what is still left.', next: 'ending_good' }
+        ]
+      },
+      late_finish: {
+        label: 'Scene 4: Too late',
+        text: 'You waited too long, and now the assignment is harder to complete well. You have learned something important: the structure of the system affects the outcome, and your earlier choices matter. What now?',
+        choices: [
+          { text: 'Try again with a better plan.', next: 'ending_retry' },
+          { text: 'Ask for help and restart the schedule.', next: 'ending_retry' },
+          { text: 'Reflect on what you would do differently next time.', next: 'ending_mixed' }
+        ]
+      },
+      ending_good: {
+        label: 'Ending: A useful system',
+        text: 'You finish with a manageable plan and a clearer sense of how the planner supports decision-making. The system worked best when you used it early, checked the information, and let earlier choices shape later ones.',
+        end: true,
+        outcome: 'Successful pathway'
+      },
+      ending_retry: {
+        label: 'Ending: Try again',
+        text: 'The pathway did not go smoothly, but that was part of the learning. You can see how changing one decision early on would have altered the rest of the experience. A good system makes revision possible.',
+        end: true,
+        outcome: 'Revision pathway'
+      },
+      ending_mixed: {
+        label: 'Ending: Mixed results',
+        text: 'Some choices helped, and some did not. The pathway shows that learners need support, feedback, and opportunities to adjust. The system is useful, but it could be redesigned to be clearer or more flexible.',
+        end: true,
+        outcome: 'Mixed pathway'
+      },
+      ending_rush: {
+        label: 'Ending: Rush mode',
+        text: 'You reached the end, but the process felt chaotic. This pathway shows how a system can push users toward hasty decisions when structure is missing. The experience becomes a lesson in why planning matters.',
+        end: true,
+        outcome: 'Chaotic pathway'
+      }
+    };
+
+    const storyEl = document.getElementById('story');
+    const choicesEl = document.getElementById('choices');
+    const labelEl = document.getElementById('sceneLabel');
+    const statusEl = document.getElementById('status');
+    const restartBtn = document.getElementById('restartBtn');
+    const backBtn = document.getElementById('backBtn');
+
+    function updateStatus() {
+      const items = [
+        `<span><strong>Planner checked:</strong> <span class="badge">${state.plannerChecked ? 'Yes' : 'Not yet'}</span></span>`,
+        `<span><strong>Help asked:</strong> <span class="badge">${state.helpAsked ? 'Yes' : 'Not yet'}</span></span>`,
+        `<span><strong>Schedule made:</strong> <span class="badge">${state.scheduleMade ? 'Yes' : 'Not yet'}</span></span>`,
+        `<span><strong>Task load:</strong> <span class="badge">${state.taskStack}</span></span>`
+      ];
+      statusEl.innerHTML = items.join('');
+    }
+
+    function render(step) {
+      const scene = scenes[step];
+      if (!scene) return;
+
+      state.step = step;
+      if (typeof scene.effects === 'function') scene.effects();
+
+      labelEl.textContent = scene.label;
+      storyEl.textContent = scene.text;
+      choicesEl.innerHTML = '';
+
+      if (scene.end) {
+        const outcomeLine = document.createElement('div');
+        outcomeLine.className = 'endbox';
+        outcomeLine.innerHTML = `<strong>${scene.outcome}:</strong> This ending demonstrates how choices, memory, and consequences shape the user experience.`;
+        choicesEl.appendChild(outcomeLine);
+      } else {
+        scene.choices.forEach(choice => {
+          const button = document.createElement('button');
+          button.className = 'choice';
+          button.type = 'button';
+          button.textContent = choice.text;
+          button.addEventListener('click', () => {
+            state.history.push(step);
+            render(choice.next);
+          });
+          choicesEl.appendChild(button);
+        });
+      }
+
+      updateStatus();
+      backBtn.disabled = state.history.length === 0;
+      backBtn.style.opacity = backBtn.disabled ? .45 : 1;
+      backBtn.style.cursor = backBtn.disabled ? 'not-allowed' : 'pointer';
+    }
+
+    restartBtn.addEventListener('click', () => {
+      state.step = 'intro';
+      state.plannerChecked = false;
+      state.helpAsked = false;
+      state.scheduleMade = false;
+      state.taskStack = 0;
+      state.history = [];
+      render('intro');
+    });
+
+    backBtn.addEventListener('click', () => {
+      if (!state.history.length) return;
+      const previous = state.history.pop();
+      render(previous);
+    });
+
+    render('intro');
+  </script>
+</body>
+</html>
